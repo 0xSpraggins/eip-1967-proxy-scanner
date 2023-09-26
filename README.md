@@ -10,11 +10,16 @@ Create a dotenv file in the root directory of the repo with the following variab
 
 ```env
 MAINNET_WSS=<mainnet wss url>
-CONTRACT_ADDRESS=<contract address>
+POLYGON_WSS=<polygon wss url>
+ZKSYNC_WSS=<zksync wss url>
+ARBITRUM_WSS=<arbitrum wss url>
+OPTIMISM_WSS=<optimism wss url>
+BASE_WSS=<base wss url>
+GNOSIS_WSS=<gnosis wss url>
 ```
 
 ```bash
 source .env
 cargo build
-cargo run
+cargo run -- <network-name> <target-address>
 ```

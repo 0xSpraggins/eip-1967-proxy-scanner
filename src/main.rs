@@ -5,19 +5,59 @@ use web3::transports::WebSocket;
 use web3::types::{Address, H160, U256};
 use web3::Web3;
 
-async fn load_web3_socket() -> Web3<WebSocket> {
-    dotenv::dotenv().ok();
+enum Networks {
+    Mainnet,
+    Polygon,
+    ZkSync,
+    Arbitrum,
+    Optimism,
+    Base,
+    Gnosis
+}
 
-    let rpc_url = dotenv::var("MAINNET_WSS").expect("MAINNET_WSS environment variable not set");
+struct Config {
+    network: Networks,
+    target_address: H160,
+}
+
+async fn load_web3_socket(config: &Config) -> Web3<WebSocket> {
+    dotenv::dotenv().ok();
+    let rpc_url: String = match config.network {
+        Networks::Mainnet => dotenv::var("MAINNET_WSS").expect("MAINNET_WSS environment variable not set"),
+        Networks::Polygon => dotenv::var("POLYGON_WSS").expect("POLYGON_WSS environment variable not set"),
+        Networks::ZkSync => dotenv::var("ZKSYNC_WSS").expect("ZKSYNC_WSS environment variable not set"),
+        Networks::Arbitrum => dotenv::var("ARBITRUM_WSS").expect("ARBITRUM_WSS environment variable not set"),
+        Networks::Optimism => dotenv::var("OPTIMISM_WSS").expect("OPTIMISM_WSS environment variable not set"),
+        Networks::Base => dotenv::var("BASE_WSS").expect("BASE_WSS environment variable not set"),
+        Networks::Gnosis => dotenv::var("GNOSIS_WSS").expect("GNOSIS_WSS environment variable not set"),
+    };
     let websocket = WebSocket::new(&rpc_url).await.unwrap();
     let web3_socket: Web3<WebSocket> = web3::Web3::new(websocket);
 
     return web3_socket;
 }
 
-fn load_proxy_address() -> H160 {
-    let str_address: &str = &env::var("CONTRACT_ADDRESS").expect("CONTRACT_ADDRESS not set");
-    return Address::from_str(str_address).unwrap();
+fn get_command_args() -> Config {
+    let args: Vec<String> = env::args().collect();
+    if args.len() != 3 {
+        panic!("Invalid number of arguments");
+    }
+    let network = match args[1].as_str() {
+        "mainnet" => Networks::Mainnet,
+        "polygon" => Networks::Polygon,
+        "zksync" => Networks::ZkSync,
+        "arbitrum" => Networks::Arbitrum,
+        "optimism" => Networks::Optimism,
+        "base" => Networks::Base,
+        "gnosis" => Networks::Gnosis,
+        _ => panic!("Invalid network"),
+    };
+    let address: H160 = Address::from_str(&args[2]).unwrap();
+    let config: Config = Config {
+        network: network,
+        target_address: address,
+    };
+    return config;
 }
 
 async fn query_proxy(
@@ -79,18 +119,18 @@ async fn get_proxy_beacon(web3_socket: &Web3<WebSocket>, proxy_address: &H160) -
 
 #[tokio::main]
 async fn main() {
-    let web3s: Web3<WebSocket> = load_web3_socket().await;
-    let proxy_addr: Address = load_proxy_address();
-    let admin: Address = get_proxy_admin(&web3s, &proxy_addr).await;
-    let implementation: Address = get_proxy_implementation(&web3s, &proxy_addr).await;
+    let config: Config = get_command_args();
+    let web3s: Web3<WebSocket> = load_web3_socket(&config).await;
+    let admin: Address = get_proxy_admin(&web3s, &config.target_address).await;
+    let implementation: Address = get_proxy_implementation(&web3s, &config.target_address).await;
 
-    println!("EIP-1967 Proxy Scanner - {:?}", proxy_addr);
+    println!("EIP-1967 Proxy Scanner - {:?}", &config.target_address);
     println!("========================================================================");
 
     if implementation == Address::zero() {
         println!(
             "Proxy Beacon: {:?}",
-            get_proxy_beacon(&web3s, &proxy_addr).await
+            get_proxy_beacon(&web3s, &config.target_address).await
         );
     } else {
         println!("Implementation: {:?}", implementation);
