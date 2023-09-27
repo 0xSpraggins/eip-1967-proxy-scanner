@@ -92,9 +92,9 @@ async fn get_proxy_admin(web3_socket: &Web3<WebSocket>, proxy_address: &H160) ->
 
 async fn get_proxy_implementation(web3_socket: &Web3<WebSocket>, proxy_address: &H160) -> Address {
     // Storage Slot for Proxy Admin per EIP-1967 (https://eips.ethereum.org/EIPS/eip-1967)
-    // bytes32(uint256(keccak256('eip1967.proxy.admin')) - 1) = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103
+    // bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1) = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc
     let proxy_implementation_slot: String =
-        "0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103".to_string();
+        "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc".to_string();
 
     let res: web3::types::H256 = query_proxy(
         web3_socket.clone(),
