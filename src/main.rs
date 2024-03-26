@@ -36,7 +36,7 @@ async fn load_web3_socket(config: &Config) -> Web3<WebSocket> {
     let websocket = WebSocket::new(&rpc_url).await.unwrap();
     let web3_socket: Web3<WebSocket> = web3::Web3::new(websocket);
 
-    return web3_socket;
+    web3_socket
 }
 
 fn get_command_args() -> Config {
@@ -57,10 +57,11 @@ fn get_command_args() -> Config {
     };
     let address: H160 = Address::from_str(&args[2]).unwrap();
     let config: Config = Config {
-        network: network,
+        network,
         target_address: address,
     };
-    return config;
+
+    config
 }
 
 async fn query_proxy(
@@ -74,13 +75,13 @@ async fn query_proxy(
         .await
         .unwrap();
 
-    return res;
+    res
 }
 
 fn convert_storage_query_to_address(res: web3::types::H256) -> H160 {
     let res_as_bytes = res.as_bytes();
-    let admin = H160::from_slice(&res_as_bytes[12..]);
-    return admin;
+
+    H160::from_slice(&res_as_bytes[12..])
 }
 
 async fn get_proxy_admin(web3_socket: &Web3<WebSocket>, proxy_address: &H160) -> H160 {
@@ -90,7 +91,8 @@ async fn get_proxy_admin(web3_socket: &Web3<WebSocket>, proxy_address: &H160) ->
         "0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103".to_string();
     let res: web3::types::H256 =
         query_proxy(web3_socket.clone(), &proxy_admin_slot, proxy_address).await;
-    return convert_storage_query_to_address(res);
+
+    convert_storage_query_to_address(res)
 }
 
 async fn get_proxy_implementation(web3_socket: &Web3<WebSocket>, proxy_address: &H160) -> Address {
@@ -106,7 +108,7 @@ async fn get_proxy_implementation(web3_socket: &Web3<WebSocket>, proxy_address: 
     )
     .await;
 
-    return convert_storage_query_to_address(res);
+    convert_storage_query_to_address(res)
 }
 
 async fn get_proxy_beacon(web3_socket: &Web3<WebSocket>, proxy_address: &H160) -> Address {
@@ -117,7 +119,8 @@ async fn get_proxy_beacon(web3_socket: &Web3<WebSocket>, proxy_address: &H160) -
         "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50".to_string();
     let res: web3::types::H256 =
         query_proxy(web3_socket.clone(), &proxy_beacon_slot, proxy_address).await;
-    return convert_storage_query_to_address(res);
+
+    convert_storage_query_to_address(res)
 }
 
 #[tokio::main]
