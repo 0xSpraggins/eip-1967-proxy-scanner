@@ -7,6 +7,7 @@ use web3::Web3;
 
 enum Networks {
     Mainnet,
+    Sepolia,
     Polygon,
     ZkSync,
     Arbitrum,
@@ -24,6 +25,7 @@ async fn load_web3_socket(config: &Config) -> Web3<WebSocket> {
     dotenv::dotenv().ok();
     let rpc_url: String = match config.network {
         Networks::Mainnet => dotenv::var("MAINNET_WSS").expect("MAINNET_WSS environment variable not set"),
+        Networks::Sepolia => dotenv::var("SEPOLIA_WSS").expect("MAINNET_WSS environment variable not set"),
         Networks::Polygon => dotenv::var("POLYGON_WSS").expect("POLYGON_WSS environment variable not set"),
         Networks::ZkSync => dotenv::var("ZKSYNC_WSS").expect("ZKSYNC_WSS environment variable not set"),
         Networks::Arbitrum => dotenv::var("ARBITRUM_WSS").expect("ARBITRUM_WSS environment variable not set"),
@@ -44,6 +46,7 @@ fn get_command_args() -> Config {
     }
     let network = match args[1].as_str() {
         "mainnet" => Networks::Mainnet,
+        "sepolia" => Networks::Sepolia,
         "polygon" => Networks::Polygon,
         "zksync" => Networks::ZkSync,
         "arbitrum" => Networks::Arbitrum,

@@ -10,6 +10,7 @@ Create a dotenv file in the root directory of the repo with the following variab
 
 ```env
 MAINNET_WSS=<mainnet wss url>
+SEPOLIA_WSS=<sepolia wss url>
 POLYGON_WSS=<polygon wss url>
 ZKSYNC_WSS=<zksync wss url>
 ARBITRUM_WSS=<arbitrum wss url>
